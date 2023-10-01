@@ -23,7 +23,8 @@ def check_config_value(config,key,val):
 
 
 def login():
-    payload = {'username': 'prometheus', 'password':'CgkxGQaz5aOyR832'}
+    # payload = {'username': 'prometheus', 'password':'CgkxGQaz5aOyR832'}
+    payload = {'username': 'admin', 'password':'G4$+p3tR0l'}
     req = httpx.get("https://192.168.2.80:8080/login",params=payload,verify=False)
     res = json.loads(req.text)
     if res['success'] == 1:
@@ -32,8 +33,11 @@ def login():
         return False
 def get_data(comm,auth):
     payload = {'sid': auth}
-    req = httpx.post(f'https://192.168.2.80:8080/{comm}',params=payload,verify=False)
-    return req.text
+    payload = {'username': 'admin', 'password':'G4$+p3tR0l'}
+
+    # req = httpx.get(f'https://192.168.2.80:8080/{comm}',params=payload,verify=False)
+    req = httpx.get(f"https://192.168.2.80:8080/{comm}/?password={payload['password']}",params=payload,verify=False)
+    return json.loads(req.text)
 
 def load_config(namespace):
     config={}
@@ -48,6 +52,10 @@ def load_config(namespace):
             config[param] = getattr(namespace, param)
     return config
 
+
 parser = create_parser()
 namespace = parser.parse_args(sys.argv[1:])
 config = load_config(namespace)
+# print(login)
+sid = login()
+print(get_data('classes',sid))
