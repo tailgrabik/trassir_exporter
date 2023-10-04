@@ -6,7 +6,12 @@ import json
 import argparse
 import sys
 import time
-# import logger
+import logging
+
+logger = logging.getLogger('logger')
+logger.setLevel(logging.INFO)
+consoleHandler = logging.StreamHandler(sys.stdout)
+logger.addHandler(consoleHandler)
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -27,17 +32,27 @@ def check_config_value(config,key,val):
 
 
 def login():
-    payload = {'username': config['trassir_user'], 'password':config['trassir_password']}
-    req = httpx.post(f"https://{config['trassir_addr']}:{config['trassir_port']}/login",params=payload,verify=False)
-    res = json.loads(req.text)
-    if res['success'] == 1:
-        return res['sid']
-    else:
-        return False
+    try:
+        payload = {'username': config['trassir_user'], 'password':config['trassir_password']}
+        req = httpx.post(f"https://{config['trassir_addr']}:{config['trassir_port']}/login",params=payload,verify=False)
+        res = json.loads(req.text)
+        if res['success'] == 1:
+            logging.info(res['success'])
+            return res['sid']
+        else:
+            logging.error(res['sid'])
+            return False
+            
+    except Exception as e:
+        logging.error(e)
+
 def get_data(comm,auth):
-    payload = {'sid': auth}
-    req = httpx.post(f"https://{config['trassir_addr']}:{config['trassir_port']}/{comm}",params=payload,verify=False)
-    return json.loads(req.text)
+    try:
+        payload = {'sid': auth}
+        req = httpx.post(f"https://{config['trassir_addr']}:{config['trassir_port']}/{comm}",params=payload,verify=False)
+        return json.loads(req.text)
+    except Exception as e:
+        logging.error(e)
 
 def load_config(namespace):
     config={}
@@ -47,7 +62,8 @@ def load_config(namespace):
             config = yaml.safe_load(f)
             for param in params:
                 check_config_value(config,param,getattr(namespace,param)) 
-    except:
+    except Exception as e:
+        logging.error(e)
         for param in params:
             config[param] = getattr(namespace, param)
     return config
@@ -83,7 +99,10 @@ parser = create_parser()
 namespace = parser.parse_args(sys.argv[1:])
 config = load_config(namespace)
 sid = login()
-start_http_server(int(config['metric_port']))
+try:
+    start_http_server(int(config['metric_port']))
+except Exception as e:
+        logging.error(e)
 while True:
     data = get_data('health',sid)
     update_metrics(data)
