@@ -49,6 +49,7 @@ def login():
             
     except Exception as e:
         logging.error(e)
+        exit()
 
 def get_data(comm,auth):
     try:
@@ -57,6 +58,7 @@ def get_data(comm,auth):
         return json.loads(req.text)
     except Exception as e:
         logging.error(e)
+        exit()
 
 def load_config(namespace):
     config={}
@@ -68,6 +70,7 @@ def load_config(namespace):
                 check_config_value(config,param,getattr(namespace,param)) 
     except Exception as e:
         logging.error(e)
+        
         for param in params:
             config[param] = getattr(namespace, param)
     return config
@@ -101,6 +104,7 @@ def update_metrics(data):
         trassir_archive_priv_days.set(data['disks_stat_priv_days'])
     except Exception as e:
         logging.error(e)
+        exit()
 
 parser = create_parser()
 namespace = parser.parse_args(sys.argv[1:])
@@ -110,6 +114,7 @@ try:
     start_http_server(int(config['metric_port']))
 except Exception as e:
     logging.error(e)
+    exit()
 while True:
     data = get_data('health',sid)
     update_metrics(data)
