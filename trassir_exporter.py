@@ -13,7 +13,7 @@ root.setLevel(logging.ERROR)
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.ERROR)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 root.addHandler(handler)
 
