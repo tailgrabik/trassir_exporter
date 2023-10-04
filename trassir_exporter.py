@@ -8,10 +8,14 @@ import sys
 import time
 import logging
 
-logger = logging.getLogger('logger')
-logger.setLevel(logging.INFO)
-consoleHandler = logging.StreamHandler(sys.stdout)
-logger.addHandler(consoleHandler)
+root = logging.getLogger()
+root.setLevel(logging.ERROR)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -83,17 +87,20 @@ trassir_archive_priv_days = Gauge('trassir_archive_priv_days','Archive priv days
 
 
 def update_metrics(data):
-    trassir_disk_health.set(data['disks'])
-    trassir_database_health.set(data['database'])
-    trassir_channels_total.set(data['channels_total'])
-    trassir_channels_online.set(data['channels_online'])
-    trassir_uptime.set(data['uptime'])
-    trassir_cpu_load.set(data['cpu_load'])
-    trassir_network_status.set(data['network'])
-    trassir_automation_status.set(data['automation'])
-    trassir_archive_main_days.set(data['disks_stat_main_days'])
-    trassir_archive_subs_days.set(data['disks_stat_subs_days'])
-    trassir_archive_priv_days.set(data['disks_stat_priv_days'])
+    try:
+        trassir_disk_health.set(data['disks'])
+        trassir_database_health.set(data['database'])
+        trassir_channels_total.set(data['channels_total'])
+        trassir_channels_online.set(data['channels_online'])
+        trassir_uptime.set(data['uptime'])
+        trassir_cpu_load.set(data['cpu_load'])
+        trassir_network_status.set(data['network'])
+        trassir_automation_status.set(data['automation'])
+        trassir_archive_main_days.set(data['disks_stat_main_days'])
+        trassir_archive_subs_days.set(data['disks_stat_subs_days'])
+        trassir_archive_priv_days.set(data['disks_stat_priv_days'])
+    except Exception as e:
+        logging.error(e)
 
 parser = create_parser()
 namespace = parser.parse_args(sys.argv[1:])
@@ -102,8 +109,8 @@ sid = login()
 try:
     start_http_server(int(config['metric_port']))
 except Exception as e:
-        logging.error(e)
+    logging.error(e)
 while True:
     data = get_data('health',sid)
     update_metrics(data)
-    time.sleep(config['scrape_interval'])
+    time.sleep(int(config['scrape_interval']))
