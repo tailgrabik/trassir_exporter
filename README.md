@@ -77,7 +77,7 @@ WantedBy=multi-user.target
 ### Docker
 
 1. create config 
-2. docker run --restart=always -d -v <source_config>:/usr/src/app/trassir.yml -p<port>:<port> -it --name trassir_exporter trassir_exporter:latest
+2. docker run --restart=always -d -v <source_config>:/usr/src/app/trassir.yml -p\<port\>:\<port\> -it --name trassir_exporter trassir_exporter:latest
 
 ## Example config
 trassir.yml
